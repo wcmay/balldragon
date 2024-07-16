@@ -90,7 +90,7 @@ public class RaySceneInteractionManager : MonoBehaviour
                 lineRenderer.enabled = false;
                 var ray = GetControllerRay();
                 ghostSphere.SetActive(true);
-                ghostSphere.transform.position = ray.origin + ray.direction*0.1f;
+                ghostSphere.transform.position = ray.origin + ray.direction*0.08f;
                 if (xDown)
                 {
                     anchored = true;
