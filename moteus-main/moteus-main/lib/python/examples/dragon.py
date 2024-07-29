@@ -49,6 +49,7 @@ async def main():
             result = await c.set_stop()
         elif (dataReceived[0] == -1.0):
             result = await c.set_stop()
+            sock.close()
             quit()
 
 if __name__ == '__main__':

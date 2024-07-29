@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Meta.XR.MRUtilityKit;
 
 public class RaySceneInteractionManager : MonoBehaviour
 {
@@ -10,36 +9,48 @@ public class RaySceneInteractionManager : MonoBehaviour
     private GameObject ghostArm;
     private LineRenderer lineRenderer;
 
-    public EffectMesh effectMesh;
-    private EffectMesh effectMeshScript;
-
     public OVRHand leftHand;
     public OVRHand rightHand;
     private GestureTracker leftGesture;
     private GestureTracker rightGesture;
 
-
-    public Material virtualMaterial;
-    public Material passthroughMaterial;
     public Material selectionGhost;
 
     public GameObject dragon;
+    public GameObject floorManager;
+    public GameObject testBall;
 
     bool xDown;
     bool aDown;
 
     bool anchored;
 
+    bool passthrough;
+
+    private void setPassthrough(bool pt)
+    {
+        OVRPassthroughLayer passthroughLayer = cameraRig.GetComponent<OVRPassthroughLayer>();
+        passthroughLayer.enabled = pt;
+        Camera.main.clearFlags = pt ? CameraClearFlags.SolidColor : CameraClearFlags.Skybox;
+        if (pt) cameraRig.centerEyeAnchor.GetComponent<Camera>().backgroundColor = Color.clear;
+        cameraRig.GetComponent<OVRManager>().isInsightPassthroughEnabled = pt;
+    }
+
     private void Awake()
     {
         cameraRig = FindObjectOfType<OVRCameraRig>();
+        passthrough = true;
+        cameraRig.GetComponent<OVRManager>().isInsightPassthroughEnabled = false;
+        setPassthrough(true);
+        OVRInput.EnableSimultaneousHandsAndControllers();
+
         lineRenderer = GetComponent<LineRenderer>();
-        effectMeshScript = effectMesh.GetComponent<EffectMesh>();
+        lineRenderer.alignment = LineAlignment.View;
 
         anchored = false;
 
         ghostSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        ghostSphere.transform.localScale = dragon.transform.localScale;
+        ghostSphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         ghostSphere.GetComponent<Collider>().enabled = false;
         ghostSphere.GetComponent<Renderer>().material = selectionGhost;
         ghostSphere.SetActive(false);
@@ -54,16 +65,15 @@ public class RaySceneInteractionManager : MonoBehaviour
     {
         Vector3 rayOrigin;
         Vector3 rayDirection;
-        if (OVRInput.activeControllerType == OVRInput.Controller.Touch // right controller ray
-            || OVRInput.activeControllerType == OVRInput.Controller.RTouch)
+        if ((OVRInput.activeControllerType & OVRInput.Controller.LTouch) == OVRInput.Controller.LTouch)
         {
-            rayOrigin = cameraRig.rightControllerInHandAnchor.position;
-            rayDirection = cameraRig.rightControllerInHandAnchor.forward;
+            rayOrigin = cameraRig.leftControllerInHandAnchor.position;
+            rayDirection = cameraRig.leftControllerInHandAnchor.forward;
         }
-        else // right hand ray
+        else
         {
-            rayOrigin = rightHand.PointerPose.position;
-            rayDirection = rightHand.PointerPose.forward;
+            rayOrigin = leftGesture.indexTip;
+            rayDirection = leftHand.PointerPose.forward;
         }
 
         return new Ray(rayOrigin, rayDirection);
@@ -80,8 +90,16 @@ public class RaySceneInteractionManager : MonoBehaviour
 
         if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick)) { // reset button
             anchored = false;
+            dragon.GetComponent<dragon>().pivotPointSet = false;
             dragon.SetActive(false);
         }
+
+        /**
+        if (rightGesture.pinchDown)
+        {
+            testBall.transform.position = rightHand.PointerPose.position + rightHand.PointerPose.forward * 0.1f;
+        }
+        **/
 
         if (dragon.activeSelf == false)
         {
@@ -100,7 +118,7 @@ public class RaySceneInteractionManager : MonoBehaviour
             {
                 Vector2 LThumb = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
                 float ytrans = Mathf.Abs(LThumb.y) > 0.6f ? LThumb.y - 0.6f : 0.0f;
-                ytrans *= 0.005f;
+                ytrans *= 0.001f;
                 float rotate = Mathf.Abs(LThumb.x) > 0.4f ? LThumb.x - 0.4f : 0.0f;
                 rotate *= 1.5f;
 
@@ -127,11 +145,8 @@ public class RaySceneInteractionManager : MonoBehaviour
         }
 
         if (OVRInput.GetDown(OVRInput.RawButton.Y)) {
-            OVRPassthroughLayer passthrough = cameraRig.GetComponent<OVRPassthroughLayer>();
-            passthrough.enabled = !passthrough.enabled;
-            Material newMaterial = passthrough.enabled ? passthroughMaterial : virtualMaterial;
-            effectMeshScript.OverrideEffectMaterial(newMaterial);
+            passthrough = !passthrough;
+            setPassthrough(passthrough);
         }
-
     }
 }
