@@ -56,29 +56,31 @@ public class FloorSpawner : MonoBehaviour
 
     void DrawTiles(GameObject tilePrefab) 
     {
-        Debug.Log("drawing");
         foreach (Transform point in objects) 
         {
-            tilePosition.x = Mathf.Floor(point.transform.position.x / gap) * gap + (xRadius * gap);
-            tilePosition.y = groundLevel;
-            tilePosition.z = Mathf.Floor(point.transform.position.z / gap) * gap + (zRadius * gap);
-
-            for (int x = 0; x < gridSize.x; x++)
+            if (point.gameObject.activeSelf)
             {
+                tilePosition.x = Mathf.Floor(point.transform.position.x / gap) * gap + (xRadius * gap);
+                tilePosition.y = groundLevel;
                 tilePosition.z = Mathf.Floor(point.transform.position.z / gap) * gap + (zRadius * gap);
-                for (int z = 0; z < gridSize.y; z++)
+
+                for (int x = 0; x < gridSize.x; x++)
                 {
-                    float distance = Mathf.Pow(Vector3.Distance(tilePosition, point.transform.position), 2f);
-                    if (distance < renderDistance)
+                    tilePosition.z = Mathf.Floor(point.transform.position.z / gap) * gap + (zRadius * gap);
+                    for (int z = 0; z < gridSize.y; z++)
                     {
-                        GameObject tile = Instantiate(tilePrefab, tilePosition, Quaternion.identity) as GameObject;
-                        tile.transform.parent = this.transform;
-                        tile.transform.localScale = new Vector3(0.09f*gap, 1, 0.09f*gap);
+                        float distance = Mathf.Pow(Vector3.Distance(tilePosition, point.transform.position), 2f);
+                        if (distance < renderDistance)
+                        {
+                            GameObject tile = Instantiate(tilePrefab, tilePosition, Quaternion.identity) as GameObject;
+                            tile.transform.parent = this.transform;
+                            tile.transform.localScale = new Vector3(0.09f*gap, 1, 0.09f*gap);
+                        }
+                        tilePosition.z -= gap;
                     }
-                    tilePosition.z -= gap;
-                }
-                tilePosition.x -= gap;
-            } 
+                    tilePosition.x -= gap;
+                } 
+            }
         }
     }
 

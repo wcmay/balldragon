@@ -18,8 +18,19 @@ public class dragon : MonoBehaviour
     Vector3 rotationPlaneNormal; //normal vector to the plane that the ball is in at all points of its rotation
     float armRestAngleRadians;
 
+    float MOTEUS_THETA;
+
     // The amount of feedforward torque needed to compensate for gravity when the arm is parallel to the ground
     const float TORQUE_CONSTANT = 0.25f;
+
+    const int STATE = 0;
+    const int POSITION = 1;
+    const int VELOCITY = 2;
+    const float TARGETED_FLOATY = 1.0f;
+    const float TARGETED_WEIGHTY = 2.0f;
+    const float IDLE_FLYING = 3.0f;
+    const float MOTOR_OFF = 0.0f;
+    const float QUIT_MOTEUS_SCRIPT = -1.0f;
 
     public OVRHand leftHand;
     public OVRHand rightHand;
@@ -29,16 +40,13 @@ public class dragon : MonoBehaviour
     public GameObject treat;
 
     Thread thread;
+    public String host = "10.32.13.235";
     public int connectionPort = 25001;
-    TcpListener server;
-    TcpClient client;
-    float[] dataToSend = {-2.0f, 0.2f, 0.0f, 0.2f};
+    float[] dataToSend = {-2.0f, 0.2f, 0.2f};
     bool running;
     bool isApplicationQuitting = false;
 
     Transform centerCamera;
-
-    float theta;
 
     bool weighty = false;
     bool liftoff = false;
@@ -70,7 +78,7 @@ public class dragon : MonoBehaviour
     private void OnEnable()
     {
         running = true;
-        theta = -1.0f;
+        MOTEUS_THETA = -1.0f;
         lineRenderer.enabled = false;
         if (!pivotPointSet) {
             zeroPoint = transform.position;
@@ -92,31 +100,14 @@ public class dragon : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        if (isApplicationQuitting) return;
-
-        dataToSend[0] = 0.0f;
+    private void OnDisable () {
+        dataToSend[STATE] = QUIT_MOTEUS_SCRIPT;
     }
-
-    private void OnApplicationQuit () {
-
-        isApplicationQuitting = true;
-        dataToSend[0] = -1.0f;
-    }
-
-
-    private void OnTriggerEnter (Collider other) {
-        Debug.Log("COLLISION");
-    }
-
 
     private void GetData()
     {
-        server = new TcpListener(IPAddress.Any, connectionPort);
-        server.Start();
-        client = server.AcceptTcpClient();
 
+        using TcpClient client = new TcpClient(host, connectionPort);
         NetworkStream nwStream = client.GetStream();
         byte[] buffer;
 
@@ -125,6 +116,8 @@ public class dragon : MonoBehaviour
         {
             // Read data from the network stream
             buffer = new byte[client.ReceiveBufferSize];
+            Debug.Log(client.ReceiveBufferSize);
+            Debug.Log(client.SendBufferSize);
             int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
 
             // Decode the bytes into an array of floats
@@ -134,22 +127,22 @@ public class dragon : MonoBehaviour
             if (dataReceived != null && dataReceived.Length > 0)
             {
                 
-                theta = dataReceived[0];
+                MOTEUS_THETA = dataReceived[0];
 
                 buffer = new byte[dataToSend.Length * 4];
-
                 Buffer.BlockCopy(dataToSend, 0, buffer, 0, buffer.Length);
-
-                // Send stuff back to Python:
                 nwStream.Write(buffer, 0, buffer.Length);
 
-                if(dataToSend[0] == -1) {
-                    server.Stop();
+                if(dataToSend[STATE] == QUIT_MOTEUS_SCRIPT) {
+                    client.Close();
                     running = false;
                     Debug.Log("SERVER QUIT");
                 }
+
+                Debug.Log("Sent: [" + dataToSend[STATE] + ", " + dataToSend[POSITION] + ", " + dataToSend[VELOCITY] + "]; Received: " + MOTEUS_THETA);
             }
         }
+        thread.Abort();
     }
 
     // theta is in radians
@@ -166,13 +159,13 @@ public class dragon : MonoBehaviour
         dragonAnimation.wing_speed = 0.2f;
         dragonAnimation.turnSpeed = 0.15f;
 
-        if (theta > -1.0f)
+        if (MOTEUS_THETA > -1.0f)
         {
             Vector3 u = new Vector3(zeroPoint.x-pivotPoint.x, 0, zeroPoint.z-pivotPoint.z);
             u = u.normalized;
             Vector3 v = Vector3.up;
 
-            float thetaBiasRadians = (theta*6.2832f)+0.025f;
+            float thetaBiasRadians = (MOTEUS_THETA*6.2832f)+0.025f;
             transform.position = pivotPoint + (0.2f*Mathf.Cos(thetaBiasRadians))*u + (0.2f*Mathf.Sin(thetaBiasRadians))*v;
 
             lineRenderer.enabled = true;
@@ -238,31 +231,31 @@ public class dragon : MonoBehaviour
                 liftoff = false;
                 Vector3 a = finalTarget - pivotPoint;
                 float unclampedAngleTurns = (Vector3.Angle(u, a)/360f - 0.025f/6.2832f);
-                dataToSend[0] = 1.0f;
 
                 if (weighty) {
-                    dataToSend[1] = unclampedAngleTurns;
+
+                    dataToSend[POSITION] = unclampedAngleTurns;
 
                     if (Vector3.Distance(finalTarget, transform.position) < 0.1f) // in hand or almost in hand
                     {
-                        dataToSend[2] = Mathf.Lerp(-0.3f * CalculateFeedforwardTorque(thetaBiasRadians), dataToSend[2], 0.2f);
+                        dataToSend[STATE] = TARGETED_WEIGHTY;
                         dragonAnimation.wing_speed = 0.1f;
                     }
                     else //going to hand
                     {
-                        dataToSend[2] = CalculateFeedforwardTorque(thetaBiasRadians);
+                        dataToSend[STATE] = TARGETED_FLOATY;
                         dragonAnimation.wing_speed = 0.5f;
                         dragonAnimation.turnTarget = Vector3.Lerp(finalGesturePoint, cameraPos, 0.3f);
                         dragonAnimation.eyesTarget = finalGesturePoint;
                     }
-                    dataToSend[3] = 0.25f;
+                    dataToSend[VELOCITY] = 0.25f;
                 }
                 else // pinch or treat
                 {
-                    dataToSend[1] = Mathf.Clamp(unclampedAngleTurns, 0.025f, 0.475f - 0.025f/6.2832f);
-                    dataToSend[2] = CalculateFeedforwardTorque(thetaBiasRadians);
-                    dataToSend[3] = 0.75f;
-                    dragonAnimation.wing_speed = Mathf.InverseLerp(0.0f, 0.1f, Mathf.Abs(theta-dataToSend[1]))*0.5f + 0.5f;
+                    dataToSend[STATE] = TARGETED_FLOATY;
+                    dataToSend[POSITION] = Mathf.Clamp(unclampedAngleTurns, 0.025f, 0.475f - 0.025f/6.2832f);
+                    dataToSend[VELOCITY] = 0.75f;
+                    dragonAnimation.wing_speed = Mathf.InverseLerp(0.0f, 0.1f, Mathf.Abs(MOTEUS_THETA-dataToSend[POSITION]))*0.5f + 0.5f;
                 }
 
                 lineVerts.Add(finalTarget);
@@ -270,23 +263,23 @@ public class dragon : MonoBehaviour
             }
             else // no user-specified target
             {
-                dataToSend[0] = 1.0f;
-                dataToSend[2] = CalculateFeedforwardTorque(thetaBiasRadians);
-                dataToSend[3] = 0.25f;
+                dataToSend[VELOCITY] = 0.25f;
                 float trueMidTheta = 0.25f-0.025f/6.2832f;
-                if (Mathf.Abs(theta - trueMidTheta) < 0.1) liftoff = false;
+                if (Mathf.Abs(MOTEUS_THETA - trueMidTheta) < 0.1) liftoff = false;
                 if (weighty || liftoff) //flying out of hand
                 {
-                    dataToSend[1] =  trueMidTheta;
+                    dataToSend[STATE] = TARGETED_FLOATY;
+                    dataToSend[POSITION] =  trueMidTheta;
                     liftoff = true;
-                    dragonAnimation.wing_speed = Mathf.InverseLerp(0.0f, 0.25f, Mathf.Abs(theta-dataToSend[1]));
+                    dragonAnimation.wing_speed = Mathf.InverseLerp(0.0f, 0.25f, Mathf.Abs(MOTEUS_THETA-dataToSend[POSITION]));
                     dragonAnimation.turnTarget = Vector3.Lerp(transform.position + Vector3.up, cameraPos, 0.6f);
                     dragonAnimation.eyesTarget = Vector3.Lerp(transform.position + Vector3.up, cameraPos, 0.3f);
                 }
-                else //idle flying
+                else // idle flying
                 {
                     dragonAnimation.wing_speed = 0.25f;
-                    dataToSend[1] = theta;
+                    dataToSend[STATE] = IDLE_FLYING;
+                    dataToSend[POSITION] = MOTEUS_THETA;
                 }
                 weighty = false;
             }
@@ -296,8 +289,6 @@ public class dragon : MonoBehaviour
             {
                 lineRenderer.SetPosition(i, lineVerts[i]);
             }
-
-            Debug.Log("Sent: [" + dataToSend[0] + ", " + dataToSend[1] + ", " + dataToSend[2] + ", " + dataToSend[3] + "]; Received: " + theta);
         }
     }
 }

@@ -631,7 +631,6 @@ MonoBehaviour:
   rightHand: {fileID: 1833538162}
   selectionGhost: {fileID: 2100000, guid: c56cd5e999496354fa27a3d9f67cc050, type: 2}
   dragon: {fileID: 1629533585}
-  floorManager: {fileID: 0}
   testBall: {fileID: 99862696}
 --- !u!4 &803272963
 Transform:
@@ -892,16 +891,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114252240061623322, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114252240061623322, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
+      propertyPath: _systemGestureBehavior
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: _capsuleMaterial
       value: 
-      objectReference: {fileID: 2100000, guid: 2e74ab695e2a1e448bf7e8d5b59df9eb, type: 2}
+      objectReference: {fileID: 2100000, guid: cf964ed3d8750524dbc967878b3ed83c, type: 2}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: _skeletonMaterial
       value: 
@@ -934,9 +937,13 @@ PrefabInstance:
       propertyPath: _enablePhysicsCapsules
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114925265787909616, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 137619227449585070, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 137619227449585070, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -3097,16 +3104,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114252240061623322, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114252240061623322, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
+      propertyPath: _systemGestureBehavior
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: _capsuleMaterial
       value: 
-      objectReference: {fileID: 2100000, guid: 2e74ab695e2a1e448bf7e8d5b59df9eb, type: 2}
+      objectReference: {fileID: 2100000, guid: cf964ed3d8750524dbc967878b3ed83c, type: 2}
     - target: {fileID: 114392993255165844, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: _skeletonMaterial
       value: 
@@ -3151,9 +3162,13 @@ PrefabInstance:
       propertyPath: _meshType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114925265787909616, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 137619227449585070, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 137619227449585070, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -3463,7 +3478,7 @@ MonoBehaviour:
   objects: []
   tilePrefab: {fileID: 3739073784948974721, guid: 3a62de4bdf7d8614fa2ead6ce2a4b828, type: 3}
   gridSize: {x: 7, y: 7}
-  renderDistance: 0.15
+  renderDistance: 0.02
   groundLevel: 0
   heightToDrawBelow: 2
   gap: 0.05
@@ -4769,7 +4784,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2513404242796339832
 Transform:
   m_ObjectHideFlags: 0

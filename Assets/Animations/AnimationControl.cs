@@ -158,7 +158,7 @@ public class AnimationControl : MonoBehaviour
             0 // We don't care about the length here, so we leave it at zero
         );
 
-        Quaternion targetRotation = Quaternion.LookRotation(targetLookDir, Vector3.up);
+        Quaternion targetRotation = Quaternion.LookRotation(targetLookDir, headBone.up);
 
         targetRotation = Quaternion.Slerp(
             leftEyeBone.rotation,

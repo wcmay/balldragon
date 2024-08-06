@@ -17,7 +17,6 @@ public class RaySceneInteractionManager : MonoBehaviour
     public Material selectionGhost;
 
     public GameObject dragon;
-    public GameObject floorManager;
     public GameObject testBall;
 
     bool xDown;
@@ -39,8 +38,7 @@ public class RaySceneInteractionManager : MonoBehaviour
     private void Awake()
     {
         cameraRig = FindObjectOfType<OVRCameraRig>();
-        passthrough = true;
-        cameraRig.GetComponent<OVRManager>().isInsightPassthroughEnabled = false;
+        //setPassthrough(false);
         setPassthrough(true);
         OVRInput.EnableSimultaneousHandsAndControllers();
 
