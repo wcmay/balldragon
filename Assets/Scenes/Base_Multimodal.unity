@@ -3410,6 +3410,11 @@ MonoBehaviour:
   wing_t: 0
   wing_bones: []
   wing_speed: 0
+  wing_mod_R: -30
+  wing_mod_L: -30
+  horn_bones: []
+  part_lengths: []
+  contact_targets: []
   headBone: {fileID: 1629533586}
   leftEyeBone: {fileID: 174487398}
   rightEyeBone: {fileID: 1134568112}

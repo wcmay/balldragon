@@ -26,6 +26,13 @@ public class AnimationControl : MonoBehaviour
     public float wing_t;
     public List<GameObject> wing_bones;
     public float wing_speed;
+    public float wing_mod_R = -30.0f;
+    public float wing_mod_L = -30.0f;
+
+    [Header("Contact")]
+    public List<GameObject> horn_bones;
+    public float[] part_lengths; //not something i wanna calc repeatedly. note that this is hardcoded which is annoying
+    public List<GameObject> contact_targets;
 
     [Header("Tracking")]
     public Transform headBone;
@@ -57,6 +64,16 @@ public class AnimationControl : MonoBehaviour
         wing_bones = new List<GameObject>();
         wing_bones.Add(GameObject.Find("Armature/Base/Ear.1.L"));
         wing_bones.Add(GameObject.Find("Armature/Base/Ear.1.R"));
+
+        horn_bones = new List<GameObject>();
+        horn_bones.Add(GameObject.Find("Armature/Base/Horn.R"));
+        horn_bones.Add(GameObject.Find("Armature/Base/Horn.L"));
+
+        //bone length order is always tail, wings, horns
+        part_lengths = new float[3];
+        part_lengths[0] = Vector3.Distance(GameObject.Find("Armature/Base/Tail.1/Tail.2").transform.position, GameObject.Find("Armature/Base/Tail.1/Tail.2/Tail.2_end").transform.position);
+        part_lengths[1] = Vector3.Distance(GameObject.Find("Armature/Base/Ear.1.L").transform.position, GameObject.Find("Armature/Base/Ear.1.L/Ear.1.L_end").transform.position);
+        part_lengths[2] = Vector3.Distance(GameObject.Find("Armature/Base/Horn.R").transform.position, GameObject.Find("Armature/Base/Horn.R/Horn.R_end").transform.position);
 
         turnTarget = Camera.main.transform.position;
         eyesTarget = turnTarget;
