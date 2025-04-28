@@ -1,0 +1,30 @@
+Library: C:\Users\Jim\Desktop\balldragon\balldragon\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
+--platform=Android
+--backend=burst-llvm-16
+--target=ARMV8A_AARCH64
+--global-safety-checks-setting=Off
+--meta-data-generation=False
+--dump=Function
+--float-precision=Standard
+--target-framework=NetFramework
+--assembly-defines=Assembly-CSharp;
+--assembly-defines=Meta.XR.BuildingBlocks;
+--assembly-defines=Meta.XR.MultiplayerBlocks.Shared;
+--assembly-defines=Mono.Security;
+--assembly-defines=mscorlib;
+--assembly-defines=Oculus.VR;
+--assembly-defines=System.Configuration;
+--assembly-defines=System.Core;
+--assembly-defines=System;
+--assembly-defines=System.Xml;
+--assembly-defines=Unity.XR.Management;
+--assembly-defines=Unity.XR.Oculus;
+--assembly-defines=UnityEngine;
+--generate-link-xml=Temp\burst.link.xml
+--temp-folder=C:\Users\Jim\Desktop\balldragon\balldragon\Temp\Burst
+--key-folder=C:/Program Files/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer
+--decode-folder=C:\Users\Jim\Desktop\balldragon\balldragon\Library\Burst
+--output=C:\Users\Jim\Desktop\balldragon\balldragon\Temp\BurstOutput\tempburstlibs\arm64-v8a\lib_burst_generated
+--pdb-search-paths=Temp/ManagedSymbols/
+
+
